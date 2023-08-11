@@ -1,0 +1,52 @@
+{
+  "ModId": "Q2EMultiplayerPlus",
+  "ModName": "Q2E Multiplayer Plus",
+  "ModAuthor": "JPiolho",
+  "ModVersion": "1.0.0",
+  "ModDescription": "",
+  "ModDll": "Q2EMultiplayerPlus.dll",
+  "ModIcon": "Preview.png",
+  "ModR2RManagedDll32": "x86/Q2EMultiplayerPlus.dll",
+  "ModR2RManagedDll64": "x64/Q2EMultiplayerPlus.dll",
+  "ModNativeDll32": "",
+  "ModNativeDll64": "",
+  "Tags": [],
+  "CanUnload": null,
+  "HasExports": null,
+  "IsLibrary": false,
+  "ReleaseMetadataFileName": "Q2EMultiplayerPlus.ReleaseMetadata.json",
+  "PluginData": {
+    "GitHubDependencies": {
+      "IdToConfigMap": {
+        "reloaded.sharedlib.hooks": {
+          "Config": {
+            "UserName": "Sewer56",
+            "RepositoryName": "Reloaded.SharedLib.Hooks.ReloadedII",
+            "UseReleaseTag": true,
+            "AssetFileName": "reloaded.sharedlib.hooks.zip"
+          },
+          "ReleaseMetadataName": "Sewer56.Update.ReleaseMetadata.json"
+        },
+        "Reloaded.Memory.SigScan.ReloadedII": {
+          "Config": {
+            "UserName": "Reloaded-Project",
+            "RepositoryName": "Reloaded.Memory.SigScan",
+            "UseReleaseTag": false,
+            "AssetFileName": "Mod.zip"
+          },
+          "ReleaseMetadataName": "Reloaded.Memory.SigScan.ReloadedII.ReleaseMetadata.json"
+        }
+      }
+    }
+  },
+  "IsUniversalMod": false,
+  "ModDependencies": [
+    "reloaded.sharedlib.hooks",
+    "Reloaded.Memory.SigScan.ReloadedII"
+  ],
+  "OptionalDependencies": [],
+  "SupportedAppId": [
+    "quake2ex_steam.exe"
+  ],
+  "ProjectUrl": ""
+}

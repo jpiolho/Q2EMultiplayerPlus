@@ -1,0 +1,125 @@
+# Script to build and publish a Reloaded Mod based on script from Sewer56.
+
+# Produces: 
+#   - Build to Upload to GitHub
+#   - Changelog
+
+# When pushing a tag
+#   - Upload to GitHub Releases
+
+name: Build and Publish Reloaded Mod
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+env: 
+  PUBLISH_COMMON_PATH: ./Publish/ToUpload/
+  PUBLISH_GITHUB_PATH: ./Publish/ToUpload/Generic
+  PUBLISH_CHANGELOG_PATH: ./Publish/Changelog.md
+  PUBLISH_PATH: ./Publish
+  
+  CSPROJ_PATH: ./Q2EMultiplayerPlus/Q2EMultiplayerPlus.csproj
+  MODCONFIG_PATH: ./Q2EMultiplayerPlus/ModConfig.json
+  RELOADEDII_PACKAGENAME: Q2EMultiplayerPlus
+  
+  RELOADEDIIMODS: .
+  
+  IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/') }}
+  RELEASE_TAG: ${{ github.ref_name }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        
+  
+    steps:
+      # Fetch latest code
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+          lfs: true
+      
+      # Checkout LFS objects
+      - name: Checkout LFS objects
+        run: git lfs checkout
+      
+      # Install .NET
+      - name: Setup .NET 5.0 (required for Reloaded.Tools)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 5.0.x
+          
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          
+      # Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      
+      - name: Setup AutoChangelog
+        run: npm install -g auto-changelog
+      
+      - name: Create Changelog
+        run: |
+          [System.IO.Directory]::CreateDirectory("$env:PUBLISH_PATH")
+          if ($env:IS_RELEASE -eq 'true') {
+              auto-changelog --sort-commits date --hide-credit --template compact --commit-limit false --starting-version "$env:RELEASE_TAG" --output "$env:PUBLISH_CHANGELOG_PATH" --ignore-commit-pattern "NC:.*"
+          }
+          else {
+              auto-changelog --sort-commits date --hide-credit --template compact --commit-limit false --unreleased --output "$env:PUBLISH_CHANGELOG_PATH" --ignore-commit-pattern "NC:.*"
+          }
+    
+      - name: "Set mod version in ModConfig.json"
+        run: |
+            $json = ConvertFrom-Json (Get-Content "$env:MODCONFIG_PATH" | Out-String)
+            $json.ModVersion = "$env:RELEASE_TAG"
+            ConvertTo-Json $json -Compress | Out-File "$env:MODCONFIG_PATH"
+            
+      - name: Build mod
+        run: |
+          ./Publish.ps1 `
+            -ChangelogPath "$env:PUBLISH_CHANGELOG_PATH" `
+            -PublishNuGet False `
+            -PublishGameBanana False `
+            -ProjectPath "$env:CSPROJ_PATH" `
+            -PackageName "$env:RELOADEDII_PACKAGENAME" `
+            -GitHubUserName "$env:GITHUB_REPOSITORY_OWNER" `
+            -GitHubRepoName "$env:GITHUB_REPOSITORY"
+     
+      - name: Upload GitHub Release Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          # Artifact name
+          name: GitHub Release
+          # A file, directory or wildcard pattern that describes what to upload
+          path: ${{ env.PUBLISH_GITHUB_PATH }}/*
+      
+      - name: Upload Changelog Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          # Artifact name
+          name: Changelog
+          # A file, directory or wildcard pattern that describes what to upload
+          path: ${{ env.PUBLISH_CHANGELOG_PATH }}
+          retention-days: 0
+          
+      - name: Upload to GitHub Releases (on Tag)
+        uses: softprops/action-gh-release@v0.1.14
+        if: env.IS_RELEASE == 'true'
+        with:
+          # Path to load note-worthy description of changes in release from
+          body_path: ${{ env.PUBLISH_CHANGELOG_PATH }}
+          # Newline-delimited list of path globs for asset files to upload
+          files: |
+            ${{ env.PUBLISH_GITHUB_PATH }}/*
