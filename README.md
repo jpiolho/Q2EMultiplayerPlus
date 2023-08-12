@@ -17,3 +17,6 @@ It increases it to 32 players
 
 ### Can you really play with 32 players?
 Probably not, at least not in online. The issue is that there's a bandwidth limit from the Playfab system that cannot be overriden. Effectively the players will start lagging out hard.
+
+### What about support for non-steam versions?
+If I get access to them then I can look into adding support. Console versions are not possible however.
