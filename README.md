@@ -9,7 +9,8 @@
 2. Add the Quake 2 Enhanced exe into Reloaded-II
 3. Enable "Auto-Inject" for Quake 2 in Reloaded-II. You can find it under Edit Application -> Advanced Tools & Options
 4. [**Click here to download and install mod automatically**](https://jpiolho.github.io/QuakeReloaded/installmod.html?username=jpiolho&repo=Q2EMultiplayerPlus&file=Q2EMultiplayerPlus{tag}.7z&latestVersion=1)
-5. Run game via Steam
+5. Make sure that "Library: Reloaded.Memory.Sigscan for Reloaded II" is installed. You can find it using the "Download Mods" button in Reloaded-II
+6. Run game via Steam
 
 # FAQ
 ### How much does it increase the sliders?
@@ -17,6 +18,8 @@ It increases it to 32 players
 
 ### Can you really play with 32 players?
 Probably not, at least not in online. The issue is that there's a bandwidth limit from the Playfab system that cannot be overriden. Effectively the players will start lagging out hard.
+You can try to figure out the value by using the network visualization setting under Multiplayer options.
 
 ### What about support for non-steam versions?
 If I get access to them then I can look into adding support. Console versions are not possible however.
+
