@@ -1,9 +1,14 @@
 ﻿using Q2EMultiplayerPlus.Template;
+using QuakeReloaded.Utilities;
+using Reloaded.Hooks.Definitions;
 using Reloaded.Hooks.Definitions.Enums;
+using Reloaded.Hooks.Definitions.X64;
 using Reloaded.Hooks.ReloadedII.Interfaces;
 using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using IReloadedHooks = Reloaded.Hooks.ReloadedII.Interfaces.IReloadedHooks;
 
 namespace Q2EMultiplayerPlus
 {
@@ -72,6 +77,18 @@ namespace Q2EMultiplayerPlus
                 }, offset, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
             });
 
+            scanner.AddMainModuleScan("B9 10 00 00 00 3B C1", result =>
+            {
+                var offset = mainModule.BaseAddress + result.Offset;
+
+                _hooks!.CreateAsmHook(new[]
+                {
+                    $"use64",
+                    $"mov rcx, 0x20",
+                    $"cmp rax, rcx"
+                }, offset, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            });
+
             // Bot max limit
             scanner.AddMainModuleScan("B9 10 00 00 00 0F 44 F9", result =>
             {
@@ -83,6 +100,24 @@ namespace Q2EMultiplayerPlus
                     $"mov rcx, 0x20",
                     $"cmove rdi, rcx"
                 }, offset, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            });
+
+            // Remove cooperative player limit
+            scanner.AddMainModuleScan("C7 87 ?? ?? ?? ?? 04 00 00 00 66 0F 6E 8F ?? ?? ?? ??", result =>
+            {
+                _hooks!.CreateAsmHook(new[]
+                {
+                    $"use64"
+                }, mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            });
+
+            scanner.AddMainModuleScan("76 ?? BA 04 00 00 00 49 8B CD", result =>
+            {
+                _hooks!.CreateAsmHook(new[]
+                {
+                    $"use64",
+                    $"cmp eax,0x1000"
+                }, mainModule.GetOffset(result), AsmHookBehaviour.ExecuteFirst).Activate();
             });
         }
 
