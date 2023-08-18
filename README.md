@@ -7,10 +7,11 @@
 # How to install
 1. Download and install [Reloaded-II](https://github.com/Reloaded-Project/Reloaded-II) if you don't have it
 2. Add the Quake 2 Enhanced exe into Reloaded-II
-3. Enable "Auto-Inject" for Quake 2 in Reloaded-II. You can find it under Edit Application -> Advanced Tools & Options
-4. [**Click here to download and install mod automatically**](https://jpiolho.github.io/QuakeReloaded/installmod.html?username=jpiolho&repo=Q2EMultiplayerPlus&file=Q2EMultiplayerPlus{tag}.7z&latestVersion=1)
-5. Make sure that "Library: Reloaded.Memory.Sigscan for Reloaded II" is installed. You can find it using the "Download Mods" button in Reloaded-II
-6. Run game via Steam
+4. Enable "Auto-Inject" for Quake 2 in Reloaded-II. You can find it under Edit Application -> Advanced Tools & Options
+5. [**Click here to download and install mod automatically**](https://jpiolho.github.io/QuakeReloaded/installmod.html?username=jpiolho&repo=Q2EMultiplayerPlus&file=Q2EMultiplayerPlus{tag}.7z&latestVersion=1)
+6. Click the "+" icon next to the mod name to enable it
+7. Make sure that "Library: Reloaded.Memory.Sigscan for Reloaded II" is installed. You can find it using the "Download Mods" button in Reloaded-II
+8. Run game via Steam
 
 # FAQ
 ### How much does it increase the sliders?
