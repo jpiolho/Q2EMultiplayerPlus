@@ -189,7 +189,7 @@ public class Mod : ModBase // <= Do not Remove.
                     Config.LobbyFilterByGameModeEnum.Deathmatch => "$m_deathmatch",
                     Config.LobbyFilterByGameModeEnum.Cooperative => "$m_coop",
                     Config.LobbyFilterByGameModeEnum.CaptureTheFlag => "$m_ctf",
-                    Config.LobbyFilterByGameModeEnum.TeamDeathmatch => "$m_tdm",
+                    Config.LobbyFilterByGameModeEnum.TeamDeathmatch => "$m_teamplay",
                     _ => throw new Exception($"Unsupported filter: {_configuration.LobbyFilterByGameMode}")
                 };
 
