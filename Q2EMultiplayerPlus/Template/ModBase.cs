@@ -1,4 +1,6 @@
 ﻿
+using Q2EMultiplayerPlus.Configuration;
+
 namespace Q2EMultiplayerPlus.Template
 {
     /// <summary>
@@ -59,6 +61,12 @@ namespace Q2EMultiplayerPlus.Template
                 A. Redo memory modifications.
                 B. Re-activate hooks. (Reloaded.Hooks Supports This!)
             */
+        }
+
+        public virtual void ConfigurationUpdated(Config configuration)
+        {
+            // Apply settings from configuration.
+            // ... your code here.
         }
 
     }
