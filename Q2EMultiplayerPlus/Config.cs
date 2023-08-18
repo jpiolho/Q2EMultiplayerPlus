@@ -81,16 +81,13 @@ Allows you to use a custom expression for sorting the lobby list.
 If you type these incorrectly, you might crash the game or not get any lobby results.
 There's no guarantee that they'll work as it works directly with Playfab.
 
-Type in the sort priority in the following format: <Key> <asc|desc>
+Type in the sort priority in the following format: ""<Key> <asc|desc>"" or ""distance{<Key>=<Value>} <asc|desc>""
 Use comma to separate further sorting
 
 Examples:
-* Sort by gamemodes: string_key5 asc
-* Sort by player name: string_key8 asc
 * Sort by player count: lobby/memberCount desc
-* Sort by ingame and then names: string_key6 asc,string_key8 asc
+* Sort by games closer to 4 players: distance{lobby/memberCount=4}
 
-Please refer to Custom Filter description to learn about which fields you can use.
 Note that this sorting applies additively to any other sorting that you've chosen in the configuration.")]
         [DefaultValue(null)]
         public string? LobbyAdvancedSort { get; set; } = null;
@@ -107,7 +104,8 @@ Note that this sorting applies additively to any other sorting that you've chose
         public enum LobbySortByEnum
         {
             Disabled,
-            PlayerCount
+            MostPlayers,
+            LeastPlayers
         }
     }
 

@@ -224,7 +224,8 @@ public class Mod : ModBase // <= Do not Remove.
             {
                 sortString = _configuration.LobbySortBy switch
                 {
-                    Config.LobbySortByEnum.PlayerCount => "lobby/memberCount desc",
+                    Config.LobbySortByEnum.MostPlayers => "lobby/memberCount desc",
+                    Config.LobbySortByEnum.LeastPlayers => "lobby/memberCount asc",
                     _ => throw new Exception($"Unsupported sort: {_configuration.LobbySortBy}")
                 };
             }
