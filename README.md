@@ -1,5 +1,5 @@
 # Q2E Multiplayer Plus
-<p align="center">An engine mod for Quake 2 Enhanced that increases max players and maximum bots sliders</p>
+<p align="center">An engine mod for Quake 2 Enhanced that improves lobby search, increases max players and maximum bots sliders</p>
 <p align="center">This mod uses <a href="https://github.com/Reloaded-Project/Reloaded-II">Reloaded-II</a></p>
 
 <p align="center"><b>Please note that this isn't officially supported, so any issues that arise with it are your own responsability</b></p>
@@ -14,6 +14,13 @@
 8. Run game via Steam
 
 # FAQ
+
+### How to configure the mod?
+Right-click the mod in Reloaded-II and select "Configure"
+
+### How is the lobby search improved?
+You can configure to show more results, as well as additional filtering and sorting options
+
 ### How much does it increase the sliders?
 It increases it to 32 players
 
