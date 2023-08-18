@@ -20,6 +20,9 @@ It increases it to 32 players
 Probably not, at least not in online. The issue is that there's a bandwidth limit from the Playfab system that cannot be overriden. Effectively the players will start lagging out hard.
 You can try to figure out the value by using the network visualization setting under Multiplayer options.
 
+### Why not more than 32 players?
+Since you can't add more than 32 bots or most likely can't really play online with more than 32 players, this seems like an ok number. If you really need more than 32 players in a LAN game or so, you can use console commands to achieve it.
+
 ### What about support for non-steam versions?
 If I get access to them then I can look into adding support. Console versions are not possible however.
 
