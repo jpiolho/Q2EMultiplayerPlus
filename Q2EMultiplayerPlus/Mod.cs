@@ -3,7 +3,7 @@ using Q2EMultiplayerPlus.Models;
 using Q2EMultiplayerPlus.Template;
 using Reloaded.Hooks.Definitions;
 using Reloaded.Hooks.Definitions.Enums;
-using Reloaded.Memory.Sigscan;
+using Reloaded.Memory.Sigscan.Definitions;
 using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
 using System.Diagnostics;
@@ -65,44 +65,49 @@ public class Mod : ModBase // <= Do not Remove.
         _modConfig = context.ModConfig;
         _nativeAllocs = new();
 
-
         if (_hooks is null)
             throw new Exception("Hooks is null");
 
-        // Try to get the modules
-        ProcessModule? mainModule, playfabModule = null;
-        foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
-        {
-            switch (module.ModuleName)
-            {
-                case "PlayFabMultiplayerWin.dll": playfabModule = module; break;
-            }
-        }
-        mainModule = Process.GetCurrentProcess().MainModule;
 
-        if (mainModule == null)
-            throw new Exception("Failed to find main module");
-        if (playfabModule == null)
-            throw new Exception("Failed to find playfab module");
+        StartupObjects startupObjects = new();
 
-        if (!_modLoader.GetController<IStartupScanner>().TryGetTarget(out var scanner))
+        FillProcessAndModules(startupObjects);
+
+        if (!_modLoader.GetController<IStartupScanner>().TryGetTarget(out startupObjects.scanner!))
             throw new Exception("Failed to get scanner");
 
-        HookMaxPlayers(mainModule, scanner);
-        HookLobbySearchIncrease(playfabModule, scanner);
+        if (!_modLoader.GetController<IScannerFactory>().TryGetTarget(out startupObjects.scannerFactory!))
+            throw new Exception("Failed to get scanner factory");
+
+        HookMaxPlayers(startupObjects);
+        HookLobbySearchIncrease(startupObjects);
     }
 
-    private void HookLobbySearchIncrease(ProcessModule playfabModule, IStartupScanner scanner)
+    private void FillProcessAndModules(StartupObjects startupObjects)
     {
-        var playfabScanner = new Scanner(Process.GetCurrentProcess(), playfabModule);
+        startupObjects.process = Process.GetCurrentProcess();
 
-        _nativeAllocs.LobbyMaxSearchCount = Marshal.AllocHGlobal(sizeof(uint));
-        _nativeAllocs.LobbySearchFilterBuffer = Marshal.AllocHGlobal(256);
+        // Try to get the modules
+        foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
+        {
+            switch (module.ModuleName.ToUpperInvariant())
+            {
+                case "PLAYFABMULTIPLAYERWIN.DLL": startupObjects.playfabModule = module; break;
+            }
+        }
 
-        Marshal.WriteInt32(_nativeAllocs.LobbyMaxSearchCount, 50);
+        startupObjects.mainModule = startupObjects.process.MainModule ?? throw new Exception("Failed to get main process module");
+
+        if (startupObjects.playfabModule is null)
+            throw new Exception("Failed to get playfab module");
+    }
+
+    private void HookLobbySearchIncrease(StartupObjects objects)
+    {
+        var playfabScanner = objects.scannerFactory.CreateScanner(objects.process, objects.playfabModule);
 
         // PFMultiplayerFindLobbies
-        scanner.AddArbitraryScan(playfabScanner, "40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC 78 48 C7 44 24 ?? FE FF FF FF 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 49 8B D9", result =>
+        objects.scanner.AddArbitraryScan(playfabScanner, "40 53 55 56 57 41 54 41 55 41 56 41 57 48 83 EC 78 48 C7 44 24 ?? FE FF FF FF 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 49 8B D9", result =>
         {
             try
             {
@@ -110,7 +115,7 @@ public class Mod : ModBase // <= Do not Remove.
                     throw new Exception("Failed to find PFMultiplayerFindLobbies");
 
 
-                _hook_pfMultiplayerFindLobbies = _hooks!.CreateHook<PFMultiplayerFindLobbies>(OnPFMultiplayerFindLobbies, playfabModule.GetOffset(result)).Activate();
+                _hook_pfMultiplayerFindLobbies = _hooks!.CreateHook<PFMultiplayerFindLobbies>(OnPFMultiplayerFindLobbies, objects.playfabModule.GetOffset(result)).Activate();
             }
             finally
             {
@@ -119,56 +124,56 @@ public class Mod : ModBase // <= Do not Remove.
         });
     }
 
-    private void HookMaxPlayers(ProcessModule mainModule, IStartupScanner scanner)
+    private void HookMaxPlayers(StartupObjects objects)
     {
         // Maxplayers limit
-        scanner.AddMainModuleScan("B8 10 00 00 00 44 3B F0", result =>
+        objects.scanner.AddMainModuleScan("B8 10 00 00 00 44 3B F0", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64",
                 $"mov eax, 0x20",
                 $"cmp r14d, eax"
-            }, mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
-        scanner.AddMainModuleScan("B9 10 00 00 00 3B C1", result =>
+        objects.scanner.AddMainModuleScan("B9 10 00 00 00 3B C1", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64",
                 $"mov rcx, 0x20",
                 $"cmp rax, rcx"
-            }, mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
         // Bot max limit
-        scanner.AddMainModuleScan("B9 10 00 00 00 0F 44 F9", result =>
+        objects.scanner.AddMainModuleScan("B9 10 00 00 00 0F 44 F9", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64",
                 $"mov rcx, 0x20",
                 $"cmove rdi, rcx"
-            }, mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
         // Remove cooperative player limit
-        scanner.AddMainModuleScan("C7 87 ?? ?? ?? ?? 04 00 00 00 66 0F 6E 8F ?? ?? ?? ??", result =>
+        objects.scanner.AddMainModuleScan("C7 87 ?? ?? ?? ?? 04 00 00 00 66 0F 6E 8F ?? ?? ?? ??", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64"
-            }, mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+            }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
-        scanner.AddMainModuleScan("76 ?? BA 04 00 00 00 49 8B CD", result =>
+        objects.scanner.AddMainModuleScan("76 ?? BA 04 00 00 00 49 8B CD", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64",
                 $"cmp eax,0x1000"
-            }, mainModule.GetOffset(result), AsmHookBehaviour.ExecuteFirst).Activate();
+            }, objects.mainModule.GetOffset(result), AsmHookBehaviour.ExecuteFirst).Activate();
         });
 
     }
@@ -243,6 +248,8 @@ public class Mod : ModBase // <= Do not Remove.
                 searchConfiguration->sortString = _nativeAllocs.LobbySearchSortBuffer;
             }
 
+            if (_nativeAllocs.LobbyMaxSearchCount == nint.Zero)
+                _nativeAllocs.LobbyMaxSearchCount = Marshal.AllocHGlobal(sizeof(uint));
 
             Marshal.WriteInt32(_nativeAllocs.LobbyMaxSearchCount, Math.Clamp(_configuration.LobbyMaxResultCount, 1, 50));
             searchConfiguration->clientSearchResultCount = _nativeAllocs.LobbyMaxSearchCount;
