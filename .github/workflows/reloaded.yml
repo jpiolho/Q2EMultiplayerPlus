@@ -40,7 +40,7 @@ jobs:
   
     steps:
       # Fetch latest code
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: 'recursive'
@@ -52,18 +52,18 @@ jobs:
       
       # Install .NET
       - name: Setup .NET 5.0 (required for Reloaded.Tools)
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v5.0.1
         with:
           dotnet-version: 5.0.x
           
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v5.0.1
         with:
           dotnet-version: 9.0.x
           
       # Install Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v6
         with:
           node-version: '18'
       
@@ -98,7 +98,7 @@ jobs:
             -GitHubRepoName "$env:GITHUB_REPOSITORY"
      
       - name: Upload GitHub Release Artifact
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4.0.0
         with:
           # Artifact name
           name: GitHub Release
@@ -106,7 +106,7 @@ jobs:
           path: ${{ env.PUBLISH_GITHUB_PATH }}/*
       
       - name: Upload Changelog Artifact
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4.0.0
         with:
           # Artifact name
           name: Changelog
