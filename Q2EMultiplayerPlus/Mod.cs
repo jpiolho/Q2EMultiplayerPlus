@@ -127,13 +127,13 @@ public class Mod : ModBase // <= Do not Remove.
     private void HookMaxPlayers(StartupObjects objects)
     {
         // Maxplayers limit
-        objects.scanner.AddMainModuleScan("B8 10 00 00 00 44 3B F0", result =>
+        objects.scanner.AddMainModuleScan("B8 10 00 00 00 3B F8", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
                 $"use64",
                 $"mov eax, 0x20",
-                $"cmp r14d, eax"
+                $"cmp edi, eax"
             }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
@@ -159,7 +159,7 @@ public class Mod : ModBase // <= Do not Remove.
         });
 
         // Remove cooperative player limit
-        objects.scanner.AddMainModuleScan("C7 87 ?? ?? ?? ?? 04 00 00 00 66 0F 6E 8F ?? ?? ?? ??", result =>
+        objects.scanner.AddMainModuleScan("C7 86 90 00 00 00 04 00 00 00", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
@@ -167,7 +167,7 @@ public class Mod : ModBase // <= Do not Remove.
             }, objects.mainModule.GetOffset(result), AsmHookBehaviour.DoNotExecuteOriginal).Activate();
         });
 
-        objects.scanner.AddMainModuleScan("76 ?? BA 04 00 00 00 49 8B CD", result =>
+        objects.scanner.AddMainModuleScan("76 ?? BA 04 00 00 00 49 8B CE", result =>
         {
             _hooks!.CreateAsmHook(new[]
             {
